@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>R.E.M.E.D.Y. — Akıllı Okul Güvenlik Sistemi</title>
+  <meta name="description" content="R.E.M.E.D.Y. projesi, NFC Bileklik teknolojisiyle çocukların okul güvenliğini anlık takip eder. Velilere huzur, öğretmenlere kolaylık." />
+  <meta property="og:title" content="R.E.M.E.D.Y. — Akıllı Okul Güvenlik Sistemi" />
+  <meta property="og:description" content="NFC Bileklik ile çocuk güvenliği artık elinizin altında." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230077B6'/><path d='M10 16 L14 20 L22 12' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue-deep:   #023E8A;
+      --blue-ocean:  #0077B6;
+      --blue-sky:    #00B4D8;
+      --blue-light:  #48CAE4;
+      --blue-pale:   #ADE8F4;
+      --green-mid:   #52B788;
+      --green-light: #95D5B2;
+      --green-pale:  #D8F3DC;
+      --white:       #F0FAFF;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 48px;
+      --space-2xl: 80px;
+      --space-3xl: 120px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--blue-deep);
+      color: var(--white);
+      line-height: 1.7;
+    }
+
+    /* ─── SLIDE BASE ─────────────────────────── */
+    .slide {
+      min-height: 100dvh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    /* ─── NOISE TEXTURE ──────────────────────── */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .slide > * { position: relative; z-index: 2; }
+
+    /* ─── SLIDE COUNTER ──────────────────────── */
+    .slide-num {
+      position: absolute;
+      bottom: var(--space-lg);
+      right: var(--space-lg);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      opacity: 0.35;
+      font-weight: 600;
+      z-index: 10;
+    }
+
+    /* ─── TYPOGRAPHY ─────────────────────────── */
+    h1, h2, h3 {
+      font-family: 'Fraunces', serif;
+      line-height: 1.1;
+    }
+
+    .label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: var(--space-md);
+    }
+
+    /* ─── SLIDE 1 · TITLE ────────────────────── */
+    #s1 {
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 80%, rgba(0,180,216,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 20%, rgba(82,183,136,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 80% at 50% 50%, #012a5e 0%, #011833 100%);
+      text-align: center;
+    }
+
+    .title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: rgba(0,180,216,0.12);
+      border: 1px solid rgba(0,180,216,0.3);
+      border-radius: 100px;
+      padding: var(--space-xs) var(--space-md);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      color: var(--blue-light);
+      margin-bottom: var(--space-xl);
+    }
+
+    .title-badge svg { flex-shrink: 0; }
+
+    #s1 h1 {
+      font-size: clamp(3.5rem, 12vw, 9rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--white) 20%, var(--blue-pale) 60%, var(--green-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-lg);
+    }
+
+    #s1 .sub {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      max-width: 560px;
+      margin: 0 auto var(--space-xl);
+      opacity: 0.75;
+      font-weight: 400;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: linear-gradient(135deg, var(--blue-ocean), var(--blue-sky));
+      color: white;
+      padding: 14px 32px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      box-shadow:
+        0 2px 4px rgba(0,119,182,0.2),
+        0 8px 20px rgba(0,119,182,0.3),
+        0 24px 48px rgba(0,119,182,0.15);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    }
+    .hero-cta:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow:
+        0 4px 8px rgba(0,119,182,0.25),
+        0 16px 32px rgba(0,119,182,0.35),
+        0 32px 64px rgba(0,119,182,0.2);
+    }
+    .hero-cta:active { transform: scale(0.97); }
+
+    /* Floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 70%);
+      top: -100px; left: -100px;
+      animation: float1 8s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(82,183,136,0.1) 0%, transparent 70%);
+      bottom: -60px; right: -60px;
+      animation: float2 10s ease-in-out infinite;
+    }
+    @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,20px)} }
+    @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-30px)} }
+
+    /* ─── SLIDE 2 · PROBLEM ──────────────────── */
+    #s2 {
+      background:
+        radial-gradient(ellipse 60% 50% at 10% 20%, rgba(0,119,182,0.15) 0%, transparent 60%),
+        linear-gradient(170deg, #012952 0%, #011428 100%);
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      max-width: 800px;
+      width: 100%;
+      margin-top: var(--space-xl);
+    }
+
+    .problem-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: var(--space-xl);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), border-color 0.3s ease;
+    }
+    .problem-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,180,216,0.25);
+    }
+
+    .problem-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: var(--space-md);
+    }
+    .problem-icon.red   { background: rgba(239,68,68,0.15); }
+    .problem-icon.amber { background: rgba(245,158,11,0.15); }
+
+    .problem-card h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      margin-bottom: var(--space-sm);
+    }
+    .problem-card p { font-size: 0.875rem; opacity: 0.65; line-height: 1.6; }
+
+    /* ─── SLIDE 3 · SOLUTION ─────────────────── */
+    #s3 {
+      background:
+        radial-gradient(ellipse 70% 60% at 80% 30%, rgba(0,180,216,0.16) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 20% 70%, rgba(82,183,136,0.12) 0%, transparent 50%),
+        linear-gradient(150deg, #013d7a 0%, #012040 100%);
+      text-align: center;
+    }
+
+    .iband-visual {
+      width: 180px; height: 180px;
+      margin: var(--space-xl) auto;
+      position: relative;
+    }
+
+    .iband-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      animation: pulse-ring 2.5s ease-in-out infinite;
+    }
+    .iband-ring:nth-child(1) {
+      background: rgba(0,180,216,0.08);
+      animation-delay: 0s;
+    }
+    .iband-ring:nth-child(2) {
+      inset: 15px;
+      background: rgba(0,180,216,0.1);
+      animation-delay: 0.4s;
+    }
+    .iband-ring:nth-child(3) {
+      inset: 30px;
+      background: rgba(0,180,216,0.13);
+      animation-delay: 0.8s;
+    }
+    .iband-core {
+      position: absolute;
+      inset: 45px;
+      background: linear-gradient(135deg, var(--blue-ocean), var(--blue-sky));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow:
+        0 0 0 1px rgba(0,180,216,0.4),
+        0 8px 32px rgba(0,119,182,0.5);
+    }
+
+    @keyframes pulse-ring {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.06); opacity: 0.6; }
+    }
+
+    #s3 h2 { font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -0.03em; margin-bottom: var(--space-md); }
+    #s3 p  { max-width: 540px; margin: 0 auto; opacity: 0.7; font-size: 1rem; }
+
+    /* ─── SLIDE 3b · PRODUCT SHOWCASE ──────────── */
+    #s3b {
+      background:
+        radial-gradient(ellipse 55% 50% at 75% 20%, rgba(0,180,216,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 45% at 20% 75%, rgba(82,183,136,0.1) 0%, transparent 50%),
+        linear-gradient(158deg, #012648 0%, #011428 100%);
+    }
+
+    .band-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+      max-width: 860px;
+      width: 100%;
+      margin-top: var(--space-xl);
+    }
+
+    .band-card {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), border-color 0.3s ease;
+    }
+    .band-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(0,180,216,0.28);
+    }
+
+    .band-img {
+      width: 100%;
+      aspect-ratio: 1 / 1.05;
+      background-image: url('./Gemini_Generated_Image_ofpu84ofpu84ofpu.png');
+      background-size: 300% auto;
+      background-repeat: no-repeat;
+    }
+    .band-img.blue  { background-position: 0%   32%; }
+    .band-img.green { background-position: 50%  32%; }
+    .band-img.pink  { background-position: 100% 32%; }
+
+    .band-info {
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .band-info .band-tag {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .band-card.blue-band  .band-tag { color: var(--blue-light); }
+    .band-card.green-band .band-tag { color: var(--green-light); }
+    .band-card.pink-band  .band-tag { color: #f4a8b8; }
+    .band-info h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .band-info p { font-size: 0.78rem; opacity: 0.5; line-height: 1.5; }
+
+    /* ─── SLIDE 4 · FEATURES ─────────────────── */
+    #s4 {
+      background:
+        radial-gradient(ellipse 50% 60% at 90% 80%, rgba(82,183,136,0.12) 0%, transparent 55%),
+        linear-gradient(160deg, #012040 0%, #021529 100%);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--space-md);
+      max-width: 860px;
+      width: 100%;
+      margin-top: var(--space-xl);
+    }
+
+    .feat-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: var(--space-xl) var(--space-md);
+      text-align: center;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.3s ease, border-color 0.3s ease;
+      cursor: default;
+    }
+    .feat-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      background: rgba(0,180,216,0.08);
+      border-color: rgba(0,180,216,0.3);
+    }
+    .feat-card:hover .feat-icon-wrap { transform: scale(1.1); }
+
+    .feat-icon-wrap {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(0,180,216,0.2), rgba(82,183,136,0.15));
+      border: 1px solid rgba(0,180,216,0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-md);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .feat-card h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+    .feat-card p { font-size: 0.75rem; opacity: 0.5; line-height: 1.5; }
+
+    /* ─── SLIDE 5 · HOW IT WORKS ─────────────── */
+    #s5 {
+      background:
+        radial-gradient(ellipse 60% 50% at 15% 40%, rgba(0,119,182,0.16) 0%, transparent 55%),
+        linear-gradient(155deg, #012345 0%, #011020 100%);
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      max-width: 640px;
+      width: 100%;
+      margin-top: var(--space-xl);
+    }
+
+    .step {
+      display: flex;
+      gap: var(--space-lg);
+      align-items: flex-start;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue-ocean), var(--blue-sky));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      box-shadow:
+        0 4px 12px rgba(0,119,182,0.35),
+        0 0 0 1px rgba(0,180,216,0.2);
+    }
+
+    .step-body h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+    .step-body p { font-size: 0.875rem; opacity: 0.6; }
+
+    .step-connector {
+      width: 2px; height: 24px;
+      background: linear-gradient(to bottom, rgba(0,180,216,0.4), transparent);
+      margin-left: 21px;
+      margin-top: -4px;
+      margin-bottom: -4px;
+    }
+
+    /* ─── SLIDE 6 · WHO BENEFITS ─────────────── */
+    #s6 {
+      background:
+        radial-gradient(ellipse 55% 55% at 85% 15%, rgba(0,180,216,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 10% 85%, rgba(82,183,136,0.13) 0%, transparent 55%),
+        linear-gradient(145deg, #01294f 0%, #011828 100%);
+    }
+
+    .benefit-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      max-width: 820px;
+      width: 100%;
+      margin-top: var(--space-xl);
+    }
+
+    .benefit-col {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: var(--space-xl);
+    }
+    .benefit-col.parents { border-top: 3px solid var(--blue-sky); }
+    .benefit-col.teachers { border-top: 3px solid var(--green-mid); }
+
+    .benefit-col h3 {
+      font-size: 1.2rem;
+      margin-bottom: var(--space-lg);
+      display: flex; align-items: center; gap: var(--space-sm);
+    }
+
+    .benefit-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-sm); }
+    .benefit-list li {
+      display: flex; align-items: flex-start; gap: var(--space-sm);
+      font-size: 0.875rem; opacity: 0.75;
+    }
+    .benefit-list li::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+    .parents   .benefit-list li::before { background: var(--blue-sky); }
+    .teachers  .benefit-list li::before { background: var(--green-mid); }
+
+    /* ─── SLIDE 7 · CLOSING ──────────────────── */
+    #s7 {
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,119,182,0.25) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 20% 20%, rgba(82,183,136,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(0,180,216,0.12) 0%, transparent 50%),
+        linear-gradient(160deg, #011428 0%, #020c1a 100%);
+      text-align: center;
+    }
+
+    #s7 h2 { font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -0.03em; margin-bottom: var(--space-lg); }
+    #s7 .tagline { font-size: 1.1rem; opacity: 0.6; max-width: 480px; margin: 0 auto var(--space-xl); }
+
+    .team-tag {
+      display: inline-flex;
+      gap: var(--space-sm);
+      align-items: center;
+      padding: var(--space-sm) var(--space-lg);
+      border: 1px solid rgba(0,180,216,0.2);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      opacity: 0.5;
+      letter-spacing: 0.08em;
+    }
+
+    .closing-orb-1 {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,119,182,0.08) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: breathe 6s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%,100% { transform: translate(-50%,-50%) scale(1); }
+      50%      { transform: translate(-50%,-50%) scale(1.15); }
+    }
+
+    /* ─── ENTER ANIMATIONS ───────────────────── */
+    .anim { opacity: 0; transform: translateY(24px); }
+
+    .slide.visible .anim {
+      animation: slide-up 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .slide.visible .anim:nth-child(1) { animation-delay: 0.05s; }
+    .slide.visible .anim:nth-child(2) { animation-delay: 0.15s; }
+    .slide.visible .anim:nth-child(3) { animation-delay: 0.25s; }
+    .slide.visible .anim:nth-child(4) { animation-delay: 0.35s; }
+    .slide.visible .anim:nth-child(5) { animation-delay: 0.45s; }
+
+    @keyframes slide-up {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feat-card.anim { animation-fill-mode: forwards; }
+    .feat-card:nth-child(1) { animation-delay: 0.05s; }
+    .feat-card:nth-child(2) { animation-delay: 0.12s; }
+    .feat-card:nth-child(3) { animation-delay: 0.19s; }
+    .feat-card:nth-child(4) { animation-delay: 0.26s; }
+    .feat-card:nth-child(5) { animation-delay: 0.33s; }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 768px) {
+      .problem-grid  { grid-template-columns: 1fr; }
+      .benefit-cols  { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .features-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── SLIDE 1 · TITLE ───────────────────────── -->
+  <section class="slide" id="s1">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="title-badge anim">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Akıllı Okul Güvenlik Sistemi
+    </div>
+
+    <h1 class="anim">R.E.M.E.D.Y.</h1>
+
+    <p class="sub anim">
+      NFC Bileklik teknolojisiyle çocukların okul içindeki güvenliğini anlık takip et.<br />
+      Velilere huzur, öğretmenlere kolaylık.
+    </p>
+
+    <a href="#s2" class="hero-cta anim">
+      Keşfet
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+
+    <span class="slide-num">01 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 2 · PROBLEM ─────────────────────── -->
+  <section class="slide" id="s2">
+    <div class="label anim">Sorun</div>
+    <h2 class="anim" style="font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-0.03em;text-align:center;max-width:600px;">
+      Okul, neden kaygı kaynağına döndü?
+    </h2>
+
+    <div class="problem-grid">
+      <div class="problem-card anim">
+        <div class="problem-icon red">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h3>Veli Kaygısı</h3>
+        <p>Ebeveynler, çocuklarının okul içinde sağlık durumunu ve güvende olup olmadığını bilemez. Bu belirsizlik sürekli bir endişeye dönüşür.</p>
+      </div>
+
+      <div class="problem-card anim">
+        <div class="problem-icon amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+        </div>
+        <h3>Öğretmen Yükü</h3>
+        <p>Her geçişte, her kırılma anında manuel kayıt tutmak öğretmenlerin eğitime ayıracağı zamanı tüketir.</p>
+      </div>
+
+      <div class="problem-card anim">
+        <div class="problem-icon red">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <h3>Anlık Haberdar Olamama</h3>
+        <p>Acil durumlarda velilere ulaşmak uzun sürer; küçük bir sağlık sorunu bile krize dönebilir.</p>
+      </div>
+
+      <div class="problem-card anim">
+        <div class="problem-icon amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h3>Güvenlik Açıkları</h3>
+        <p>Yetkisiz erişim ve kontrolsüz alan kullanımı, okul güvenlik protokollerini yetersiz bırakır.</p>
+      </div>
+    </div>
+
+    <span class="slide-num">02 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 3 · SOLUTION ────────────────────── -->
+  <section class="slide" id="s3">
+    <div class="label anim">Çözüm</div>
+    <h2 class="anim">NFC Bileklik ile tanışın.</h2>
+    <p class="anim" style="max-width:520px;opacity:.65;text-align:center;margin-top:8px;">
+      R.E.M.E.D.Y. projesi, NFC Bileklik akıllı bileziği ile okul içindeki her çocuğu anlık olarak takip eder.
+      Kapılar, dolaplar ve alan geçişleri bilezikle iletişim kurar — tamamen arka planda.
+    </p>
+
+    <div class="iband-visual anim">
+      <div class="iband-ring"></div>
+      <div class="iband-ring"></div>
+      <div class="iband-ring"></div>
+      <div class="iband-core">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+    </div>
+
+    <p class="anim" style="font-size:.875rem;opacity:.45;text-align:center;letter-spacing:.08em;">
+      Çocuk okula girdikten son çıkışına kadar sistem otomatik çalışır.
+    </p>
+
+    <span class="slide-num">03 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 3b · PRODUCT SHOWCASE ─────────────── -->
+  <section class="slide" id="s3b">
+    <div class="label anim">NFC Bileklik — Donanım</div>
+    <h2 class="anim" style="font-size:clamp(1.8rem,4.5vw,3rem);letter-spacing:-0.03em;text-align:center;">
+      Üç renk, bir platform
+    </h2>
+    <p class="anim" style="font-size:.9rem;opacity:.55;text-align:center;max-width:480px;margin-top:8px;">
+      NFC Bileklik NFC, nabız, adım sayar ve kan oksijeni sensörlerini tek bir tasarımda birleştirir.
+    </p>
+
+    <div class="band-grid">
+
+      <div class="band-card blue-band anim">
+        <div class="band-img blue"></div>
+        <div class="band-info">
+          <div class="band-tag">Model A</div>
+          <h3>Nabız Ölçer</h3>
+          <p>Sürekli kalp atışı takibi ve anormal değerlerde anlık uyarı</p>
+        </div>
+      </div>
+
+      <div class="band-card green-band anim">
+        <div class="band-img green"></div>
+        <div class="band-info">
+          <div class="band-tag">Model B</div>
+          <h3>Adım Sayar</h3>
+          <p>Günlük aktivite takibi ile sağlıklı hareket alışkanlıkları</p>
+        </div>
+      </div>
+
+      <div class="band-card pink-band anim">
+        <div class="band-img pink"></div>
+        <div class="band-info">
+          <div class="band-tag">Model C</div>
+          <h3>Kan Oksijen Ölçer</h3>
+          <p>SpO₂ izleme ile solunum sorunlarını erkenden tespit eder</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="anim" style="font-size:.75rem;opacity:.3;text-align:center;margin-top:var(--space-lg);letter-spacing:.08em;">
+      Tüm modellerde NFC + Akıllı Saat özelliği dahildir
+    </p>
+
+    <span class="slide-num">04 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 4 · FEATURES ────────────────────── -->
+  <section class="slide" id="s4">
+    <div class="label anim">NFC Bileklik Özellikleri</div>
+    <h2 class="anim" style="font-size:clamp(1.8rem,4.5vw,3rem);letter-spacing:-0.03em;text-align:center;">
+      Tek bileklik, beş güç
+    </h2>
+
+    <div class="features-grid">
+
+      <div class="feat-card anim">
+        <div class="feat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+          </svg>
+        </div>
+        <h3>NFC</h3>
+        <p>Kapı, dolap ve alan geçişlerinde temas olmadan kimlik doğrulama</p>
+      </div>
+
+      <div class="feat-card anim">
+        <div class="feat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#52B788" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <h3>Nabız Ölçer</h3>
+        <p>Sürekli kalp atışı takibi; anormal değerlerde anlık uyarı</p>
+      </div>
+
+      <div class="feat-card anim">
+        <div class="feat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <h3>Adım Sayar</h3>
+        <p>Günlük aktivite takibi, sağlıklı hareket alışkanlıklarını destekler</p>
+      </div>
+
+      <div class="feat-card anim">
+        <div class="feat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#95D5B2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
+            <path d="M8 12s1.5 2 4 2 4-2 4-2"/>
+            <circle cx="9" cy="9" r="1" fill="#95D5B2"/>
+            <circle cx="15" cy="9" r="1" fill="#95D5B2"/>
+          </svg>
+        </div>
+        <h3>Kan Oksijeni</h3>
+        <p>SpO₂ seviyesi izleme; solunum sorunlarını erkenden tespit eder</p>
+      </div>
+
+      <div class="feat-card anim">
+        <div class="feat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#48CAE4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h3>Akıllı Saat</h3>
+        <p>Ders programı ve uyarılar doğrudan bilezikte, telefona gerek yok</p>
+      </div>
+
+    </div>
+
+    <span class="slide-num">05 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 5 · HOW IT WORKS ────────────────── -->
+  <section class="slide" id="s5">
+    <div class="label anim">Nasıl Çalışır?</div>
+    <h2 class="anim" style="font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-0.03em;text-align:center;">
+      Üç adımda tam güvenlik
+    </h2>
+
+    <div class="steps">
+
+      <div class="step anim">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Çocuk okula giriş yapar</h3>
+          <p>NFC Bileklik kapı sensörüyle iletişim kurar, giriş saati ve yoklama bilgisi anlık olarak sisteme işlenir.</p>
+        </div>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step anim">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Sistem her hareketi kayıt altına alır</h3>
+          <p>Sınıf, koridor, yemekhane — her geçiş NFC noktaları üzerinden otomatik izlenir. Anlık veriler velilere ve öğretmenlere iletilir.</p>
+        </div>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step anim">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Anormallik = Anında uyarı</h3>
+          <p>Nabız veya oksijen değerleri kritik eşiği geçtiğinde ya da çocuk tanımsız bir alana girdiğinde sistem derhal bildirim gönderir.</p>
+        </div>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step anim">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Çıkışta tam özet</h3>
+          <p>Günün sonunda veliler aktivite, sağlık metrikleri ve lokasyon özetini görür. Öğretmenler ise tek tık ile devamsızlık raporuna ulaşır.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <span class="slide-num">06 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 6 · WHO BENEFITS ────────────────── -->
+  <section class="slide" id="s6">
+    <div class="label anim">Kimler Faydalanır?</div>
+    <h2 class="anim" style="font-size:clamp(1.8rem,4.5vw,3rem);letter-spacing:-0.03em;text-align:center;">
+      Herkes kazanıyor
+    </h2>
+
+    <div class="benefit-cols">
+
+      <div class="benefit-col parents anim">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          Veliler İçin
+        </h3>
+        <ul class="benefit-list">
+          <li>Acil durumlarda saniyeler içinde bildirim alın</li>
+          <li>Sağlık metriklerini uzaktan takip edin</li>
+          <li>Günlük aktivite özetiyle çocuğunuzu daha iyi tanıyın</li>
+          <li>Güven içinde işinize odaklanın</li>
+        </ul>
+      </div>
+
+      <div class="benefit-col teachers anim">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#52B788" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+          Öğretmenler İçin
+        </h3>
+        <ul class="benefit-list">
+          <li>Manuel yoklama ve kayıt süreçlerinden kurtulun</li>
+          <li>Devamsızlık raporları otomatik oluşturulsun</li>
+          <li>Sağlık acili olan öğrenciden anında haberdar olun</li>
+          <li>Yetkisiz alan kullanımına sistem müdahale etsin</li>
+          <li>Eğitime daha fazla, idari işe daha az zaman ayırın</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <span class="slide-num">07 / 08</span>
+  </section>
+
+  <!-- ── SLIDE 7 · CLOSING ─────────────────────── -->
+  <section class="slide" id="s7">
+    <div class="closing-orb-1"></div>
+
+    <div class="label anim">R.E.M.E.D.Y.</div>
+    <h2 class="anim">
+      Güvenli bir okul<br />
+      mümkün.
+    </h2>
+    <p class="tagline anim">
+      NFC Bileklik teknolojisi ile çocuk güvenliği artık gerçek zamanlı, ölçülebilir ve güvenilir.
+    </p>
+
+    <div class="anim" style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid rgba(0,180,216,0.2);border-radius:100px;font-size:.8rem;opacity:.6;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Anlık Sağlık Takibi
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid rgba(82,183,136,0.2);border-radius:100px;font-size:.8rem;opacity:.6;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52B788" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        NFC Güvenlik Ağı
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid rgba(0,180,216,0.15);border-radius:100px;font-size:.8rem;opacity:.6;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#48CAE4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        Anlık Veli Bildirimi
+      </div>
+    </div>
+
+    <div class="team-tag anim">
+      NFC Bileklik × R.E.M.E.D.Y. — 2025
+    </div>
+
+    <span class="slide-num">08 / 08</span>
+  </section>
+
+  <script>
+    // Intersection Observer for slide entrance animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.25 });
+
+    document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
+
+    // Smooth anchor navigation
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+
+</body>
+</html>
